@@ -1,0 +1,73 @@
+<!-- Include Label Studio stylesheet -->
+<link href="https://unpkg.com/label-studio@latest/build/static/css/main.css" rel="stylesheet">
+
+<!-- Create the Label Studio container -->
+<div id="label-studio"></div>
+
+<!-- Include the Label Studio library -->
+<script src="https://unpkg.com/label-studio@latest/build/static/js/main.js"></script>
+
+<!-- Initialize Label Studio -->
+<script>
+  var labelStudio = new LabelStudio('label-studio', {
+    config: `
+      <View>
+        <Image name="img" value="$image"></Image>
+        <PolygonLabels name="tag" toName="img">
+          <Label background="#FF0000" value="dog"></Label>
+          <Label background="#00FF00" value="cat"></Label>
+        </PolygonLabels>
+      </View>
+    `,
+
+    interfaces: [
+      "panel",
+      <!--"update",-->
+      "controls",
+      <!--"side-column",-->
+      <!--"annotations:menu",-->
+      <!--"annotations:add-new",-->
+      <!--"annotations:delete",-->
+      <!--"predictions:menu"-->
+    ],
+    task: {
+      annotations: [],
+      predictions: [],
+      id: 1,
+      data: {
+        image: "chosen_image.jpg"
+      }
+    },
+
+    onLabelStudioLoad: function(LS) {
+      var c = LS.annotationStore.addAnnotation({
+        userGenerate: true
+      });
+      LS.annotationStore.selectAnnotation(c.id);
+    }, 
+
+    onSubmitAnnotation: function(LS, annotation) {
+      // retrive an annotation 
+      console.log(annotation.serializeAnnotation())
+      const array = []
+      for (const annot of annotation.serializeAnnotation()) {
+          var jsonString = JSON.stringify(annot)
+          jsonString = jsonString + "\n"
+          array.push(JSON.stringify(annot) + "\n")
+      }
+      const file = new File(array, "annotation.txt", {type: "text/plain"})
+      
+      
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(file)
+      link.href = url
+      link.download = file.name
+      
+      document.body.appendChild(link)
+      link.click()
+      
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }
+  });
+</script>
