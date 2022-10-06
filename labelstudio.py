@@ -5,14 +5,33 @@ import json
 import numpy as np
 from PIL import Image, ImageDraw
 import random
+from bs4 import BeautifulSoup
+import re
 
 def launch(class_dict):
-    #class_dict = {"dog":1, "cat":2}
+    
+    html = open("label_studio.html", 'r', encoding="utf-8")
+    
+    soup = BeautifulSoup(html, "html.parser")
+    label_script = soup.find(id="label_studio_script")
+    label_string = label_script.contents[0]
+    
+    # Generate the labels to be used within the html
     colour_string = "0123456789abcdef"
     random.seed()
+    new_labels = '<PolygonLabels name="tag" toName="img">\n'
     for index, label in enumerate(class_dict.keys()):
         colour = "".join(random.choices(colour_string, k=6))
-        html_string = f"<Label background='#{colour}' value='{label}'></Label>"
+        html_string = f"<Label background='#{colour}' value='{label}'></Label>\n"
+        new_labels += html_string
+    new_labels += "</PolygonLabels>"
+    
+    updated_script = re.sub("<PolygonLabels name=\"tag\" toName=\"img\">[\s\S]+</PolygonLabels>", new_labels, label_string)
+    label_script.string = updated_script
+    
+    html = open("label_studio.html", 'w')
+    html.write(str(soup))
+    html.close()
     
     # Open the label_studio instance
     webbrowser.open('file://' + os.path.realpath("label_studio.html"))
@@ -28,6 +47,7 @@ def launch(class_dict):
     
     # Copy the annotation to this directory, and remove it from downloads
     shutil.move(download_path, "./newAnnotation.txt")
+    os.remove(download_path)
     
     # Prepare the data that will be used across each annotation
     image = Image.open("chosen_image.jpg")

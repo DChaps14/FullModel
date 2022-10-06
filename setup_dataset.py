@@ -9,6 +9,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as pt
 import shutil
+import random
 
 def extract_usables(class_dict):
     BASE_DIR = "UNetPredictions/usableImages/"
@@ -20,11 +21,13 @@ def extract_usables(class_dict):
 
     usable_images = []
     usable_masks = []
+    
+    random.seed()
 
     for index, image in enumerate(os.scandir(IMAGE_DIR)):
         if image.is_dir():
             continue
-        if index % 5 == 4: # Make 20% of the available images into a validation dataset
+        if random.random() < 0.2: # Make 20% of the available images into a validation dataset
             split = "val"
         else:
             split = "train"
@@ -71,7 +74,7 @@ def extract_usables(class_dict):
     return usable_images, usable_masks
 
 
-def install_dataset(class_dict, num_samples, num_trainable, data_yaml):
+def install_dataset(class_dict, num_samples, num_trainable, yaml_filename):
 
     # Create the appropriate directories
     try:
@@ -116,13 +119,6 @@ def install_dataset(class_dict, num_samples, num_trainable, data_yaml):
             image_height = len(image_array)
             detections = sample['ground_truth']['detections']
     
-            # if index < 25:
-            #     split = "train"
-            # else:
-            #     split = "val"
-                
-            # image_label_file = open(f"UNetPredictions/yolov5/labels/{split}/{image_name[:-3]}txt", 'a')
-    
     
             detections_for_json = []
             for detection in detections:
@@ -136,10 +132,6 @@ def install_dataset(class_dict, num_samples, num_trainable, data_yaml):
                 mask = detection["mask"]
                 x1, y1 = round(bbox[0]*image_width), round(bbox[1]*image_height)
                 width, height = len(mask[0]), len(mask)
-                # bound_x, bound_y = round(bbox[0]*image_width), round(bbox[1]*image_height)
-                # bound_width, bound_height = len(mask[0]), len(mask)
-                # print(bound_x, bound_y, bound_width, bound_height)
-                # x1, y1, x2, y2 = bound_x - bound_width//2, bound_y - bound_height//2, bound_x + bound_width//2, bound_y + bound_height//2
                 crop_mask = np.where(mask, label_int, 0)
                 crop_mask = np.reshape(crop_mask, (len(crop_mask), len(crop_mask[0]), 1))
     
@@ -148,13 +140,8 @@ def install_dataset(class_dict, num_samples, num_trainable, data_yaml):
                                   "label": label}
                 detections_for_json.append(json_detection)
                 
-                # x, y, w, h = bbox[0]+(bbox[2]/2), bbox[1]+(bbox[3]/2), bbox[2], bbox[3]
-                # image_label_file.write(f"{label_int-1} {x} {y} {w} {h}\n")
     
-    
-            # image_label_file.close()
             image.save(f"{IMAGE_DIR}/{image_name}")
-            # image.save(f"UNetPredictions/yolov5/images/{split}/{image_name}")
             mask_json = {
                 "ground_truth": {"detections": detections_for_json},
                 "filename": image_name
@@ -164,7 +151,7 @@ def install_dataset(class_dict, num_samples, num_trainable, data_yaml):
     
     
     # Load the images that can be used to train the YOLO model
-    info_file = open(f"yolov5/data/{data_yaml}", 'w')
+    info_file = open(f"yolov5/data/{data_yaml}.yaml", 'w')
     
     info_file.write("train: ../UNetPredictions/yolov5/images/train\n")
     info_file.write("val: ../UNetPredictions/yolov5/images/val\n")

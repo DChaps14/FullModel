@@ -3,6 +3,7 @@ from pipeline import UNetTrainingWithFeedback
 from UNet import UNet_Named_Layers
 from setup_dataset import extract_usables
 import subprocess
+import yolov5.train as train
 
 def first_train_unet(epochs, class_dict):
     usable_images, usable_masks = extract_usables(class_dict)
@@ -37,6 +38,4 @@ def further_train_unet(epochs, class_dict):
     model.save("model.h5")
     
 def train_yolo(epochs, data_yaml, weights_location):
-    command = f"python3 yolov5/train.py -- batch 10 --epochs {epochs} -- data {data_yaml} -- weights {weights_location} -- project 'runs/train'"
-    process = subprocess.run(command)
-    print(process)
+    train.run(data=f"{data_yaml}.yaml", batch=32,  epochs=epochs, project='runs/train', weights=weights_location)

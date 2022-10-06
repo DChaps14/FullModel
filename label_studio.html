@@ -8,7 +8,7 @@
 <script src="https://unpkg.com/label-studio@latest/build/static/js/main.js"></script>
 
 <!-- Initialize Label Studio -->
-<script>
+<script id="label_studio_script">
   var labelStudio = new LabelStudio('label-studio', {
     config: `
       <View>
@@ -22,13 +22,7 @@
 
     interfaces: [
       "panel",
-      <!--"update",-->
       "controls",
-      <!--"side-column",-->
-      <!--"annotations:menu",-->
-      <!--"annotations:add-new",-->
-      <!--"annotations:delete",-->
-      <!--"predictions:menu"-->
     ],
     task: {
       annotations: [],

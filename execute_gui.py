@@ -6,23 +6,27 @@ import os
 from PIL import Image
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
 import labelstudio
+import shutil
 
 BASE_DIR = "UNetPredictions/detections/"
 IMAGE_DIR = BASE_DIR + "images"
 MASK_DIR = BASE_DIR + "masks"
 
 RESULT_DIR = "UNetPredictions/usableImages/"
-try:
-    os.mkdir(RESULT_DIR)
-    os.mkdir(RESULT_DIR + "images")
-    os.mkdir(RESULT_DIR + "masks")
-except:
-    print("Already Created")
+
+def setup():
+    try:
+        os.mkdir(RESULT_DIR)
+        os.mkdir(RESULT_DIR + "images")
+        os.mkdir(RESULT_DIR + "masks")
+    except:
+        print("Already Created")
 
 def launch(class_dict):
-    num_usable_masks = 0
+    num_masks = 0
+    num_mask_accepted = 0
+    print("GUI Stage Launched")
     
     for image in os.scandir(IMAGE_DIR):
       # Currently displaying the crop and the mask on top of it - this could help to confirm whether the cropped image is suitable, as well as the segmentation
@@ -51,44 +55,37 @@ def launch(class_dict):
             masks.append(crop_mask)
             crops_info.append([x1, y1, x2, y2])
             labels.append(label)
-        
-        print("Launching GUI")
-    
+            
         gui = GUI(crops, masks, crops_info, labels)
         gui.construct_gui()
         gui.window.destroy()
         usable_masks = gui.usable_masks
         usable_crops = gui.usable_crops
             
-        if len(usable_masks) == len(masks):# and None not in usable_masks:
-            base_PIL_image = Image.open(base_image.path)
-            image_dims = np.array(base_PIL_image).shape
-            base_image_mask = np.zeros((image_dims[0], image_dims[1], 1))
-            for index, mask in enumerate(usable_masks):
-                if type(mask) == type(None):
-                    continue
-                num_usable_masks += 1
-                mask = np.array(mask)
-                mask = np.reshape(mask, (len(mask), len(mask[0]), 1))
-                label, crop_info = usable_crops[index]
-                x1,y1,x2,y2 = crop_info
-                mask_pad = tf.constant([[int(y1), image_dims[0]-int(y2)], [int(x1), image_dims[1]-int(x2)], [0,0]])
-                resized_mask = tf.pad(mask, mask_pad, "CONSTANT")
-                base_image_mask = np.where(resized_mask, resized_mask, base_image_mask)
-                
-            print("Checking full image")
-                
-            full_image_gui = GUI([base_PIL_image], [base_image_mask], None, None)
-            full_image_gui.construct_gui()
-            full_image_gui.window.destroy()
-            full_inaccurate = not full_image_gui.usable_masks
-        else:
-            full_inaccurate = True
+        base_PIL_image = Image.open(base_image.path)
+        image_dims = np.array(base_PIL_image).shape
+        base_image_mask = np.zeros((image_dims[0], image_dims[1], 1))
+        num_masks += len(usable_masks)
+        for index, mask in enumerate(usable_masks):
+            if type(mask) == type(None):
+                continue
+            num_mask_accepted += 1
+            mask = np.array(mask)
+            mask = np.reshape(mask, (len(mask), len(mask[0]), 1))
+            label, crop_info = usable_crops[index]
+            x1,y1,x2,y2 = crop_info
+            mask_pad = tf.constant([[int(y1), image_dims[0]-int(y2)], [int(x1), image_dims[1]-int(x2)], [0,0]])
+            resized_mask = tf.pad(mask, mask_pad, "CONSTANT")
+            base_image_mask = np.where(resized_mask, resized_mask, base_image_mask)
+                        
+        full_image_gui = GUI([base_PIL_image], [base_image_mask], None, None)
+        full_image_gui.construct_gui()
+        full_image_gui.window.destroy()
+        full_inaccurate = not full_image_gui.usable_masks
     
         detections = []
         for index, crop_info in enumerate(usable_crops):
             # crop.save(RESULT_DIR + f"images/{image.name}_{index}.jpg")
-            print(crop_info)
     
             # Rework the mask to only store the elements within the bounding box
             crop_mask = usable_masks[index]
@@ -107,9 +104,9 @@ def launch(class_dict):
             base_PIL_image.save(RESULT_DIR + f"images/{image.name}.jpg") # Reader can use the bounding values to extract the cropped image from the base image for training
         
     
-    if num_unusable == len(usable_masks): # All of the masks proposed by the model are unusable - get the user to label one image for additional training
-        # Select a random image in detections directory
-        available_images = os.listdir(IMAGE_DIR)
-        random_image = available_images[random.randrange(len(available_images))]
-        shutil.copy(f"{IMAGE_DIR}/{random_image}/base_image.jpg", "./chosen_image.jpg")
-        labelstudio.launch(class_dict)
+    print(f"User accepted {num_mask_accepted} masks out of {num_masks}")
+    # Select a random image in detections directory
+    available_images = os.listdir(IMAGE_DIR)
+    random_image = available_images[random.randrange(len(available_images))]
+    shutil.copy(f"{IMAGE_DIR}/{random_image}/base_image.jpg", "./chosen_image.jpg")
+    labelstudio.launch(class_dict)

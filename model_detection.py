@@ -6,6 +6,7 @@ import tensorflow as tf
 import re
 import matplotlib.pyplot as plt
 import shutil
+import yolov5.detect as detect
 
 BASE_DIR = "UNetPredictions/"
 RESULT_DIR = BASE_DIR + "detections/"
@@ -22,9 +23,8 @@ def establish_directories():
 
 
 def detect_yolo(weights_location, min_confidence):
-    command = f"python3 yolov5/detect.py --weights {weights_location} --conf {min_confidence} --source UNetPredictions/testImages/ --save-txt --project 'runs/detections'"
-    process = subprocess.run(command)
-    print(process)
+    detect.run(weights=weights_location, conf_thres=min_confidence, source="UNetPredictions/testImages/", save_txt=True, project="runs/detections")
+
     
 def create_mask(pred_mask):
     """Creates a mask based on a prediction from the model that can be displayed on top of an image"""
@@ -42,10 +42,12 @@ def detect_unet(input_dir, flipped_dict):
         class_dict[item[1]] = item[0]
 
     try:
-        label_dir = os.scandir(INPUT_DIR + "labels")
+        label_dir = os.scandir(os.path.join(input_dir, "labels"))
     except:
         print("No instances found within the provided image")
         
+    model = keras.models.load_model("model.h5")
+
     for crops in label_dir:
         if crops.is_dir():
             continue
@@ -62,17 +64,17 @@ def detect_unet(input_dir, flipped_dict):
         image_crops = sorted(image_crops, key = sort_images)
     
         try:
-            os.mkdir(f"{IMAGE_DIR}{image_name}")
+            os.mkdir(os.path.join(IMAGE_DIR, image_name))
         except:
             print("Image directory already created")
         try:
-            os.mkdir(f"{MASK_DIR}{image_name}")
+            os.mkdir(os.path.join(MASK_DIR, image_name))
         except:
             print("Image directory already created")
     
         # Copy across the base image to the file structure
-        base_image_path = INPUT_DIR + image_name + ".jpg"
-        shutil.copy(base_image_path, f"{IMAGE_DIR}{image_name}/base_image.jpg")
+        base_image_path = os.path.join(input_dir, image_name + ".jpg")
+        shutil.copy(base_image_path, os.path.join(IMAGE_DIR, image_name, "base_image.jpg"))
     
         for index, crop in enumerate(image_crops):
             class_int = crop[0]
@@ -88,7 +90,7 @@ def detect_unet(input_dir, flipped_dict):
             resized_crop = np.array([tf.image.resize(crop_array, [256, 256])])
             prediction = model.predict(resized_crop)[0]
             pred_mask = create_mask(prediction)
-            crop_image = tf.image.resize(resized_crop, [original_height, original_width])
+            crop_image = tf.image.resize(resized_crop[0], [original_height, original_width])
             crop_mask = tf.image.resize(pred_mask, [original_height,original_width])
     
             padding = tf.constant([[crop_y1, image_height-crop_y2], [crop_x1, image_width-crop_x2], [0,0]])
@@ -97,7 +99,7 @@ def detect_unet(input_dir, flipped_dict):
     
             crop_image = tf.keras.utils.array_to_img(crop_image)
     
-            crop_image.save(f"{IMAGE_DIR}{image_name}/file{index}.jpg")
-            np.save(f"{MASK_DIR}{image_name}/file{index}.npy", crop_mask)
-            with open(f"{MASK_DIR}{image_name}/file{index}.txt", 'w') as label_file:
+            crop_image.save(os.path.join(IMAGE_DIR, image_name, "file{index}.jpg"))
+            np.save(os.path.join(MASK_DIR, image_name, "file{index}.npy"), crop_mask)
+            with open(os.path.join(MASK_DIR, image_name, "file{index}.txt"), 'w') as label_file:
                 label_file.write(f"{class_dict.get(class_int)} {crop_x1} {crop_y1} {crop_x2} {crop_y2}")

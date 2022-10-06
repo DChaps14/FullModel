@@ -51,7 +51,6 @@ class GUI:
         
     
     def confirm_image(self):
-        print("Confirmed")
         if self.checking_mask:
             self.checking_mask = False
             self.usable_masks.append(self.masks[self.current_index])
@@ -70,10 +69,8 @@ class GUI:
         
         
     def move_to_next_crop(self):
-        print(self.checking_mask)
         if self.checking_mask:
             self.usable_masks.append(None)
-            print(self.usable_masks)
             self.checking_mask = False
         self.current_index += 1
         if self.current_index >= len(self.images):
