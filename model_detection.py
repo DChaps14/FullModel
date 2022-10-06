@@ -36,7 +36,7 @@ def create_mask(pred_mask):
 def sort_images(val):
     return (val[2]-val[0])*(val[3]-val[1])
 
-def detect_unet(input_dir, flipped_dict):
+def detect_unet(input_dir, flipped_dict, input_size):
     class_dict = {}
     for item in flipped_dict.items():
         class_dict[item[1]] = item[0]
@@ -87,7 +87,7 @@ def detect_unet(input_dir, flipped_dict):
             original_height = crop_y2-crop_y1
             crop_array = image[crop_y1:crop_y2, crop_x1:crop_x2]
             
-            resized_crop = np.array([tf.image.resize(crop_array, [256, 256])])
+            resized_crop = np.array([tf.image.resize(crop_array, [input_size, input_size])])
             prediction = model.predict(resized_crop)[0]
             pred_mask = create_mask(prediction)
             crop_image = tf.image.resize(resized_crop[0], [original_height, original_width])

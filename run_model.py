@@ -6,25 +6,45 @@ import multiprocessing
 import argparse
 import sys
 
-def parse_opt():
+def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--classes', type=str, nargs="+", help="A list of classes that will be trained", default=[])
     parser.add_argument('--demo_data', type=str, default="True", help='Use demonstration data for the pipeline')
     parser.add_argument('--source', type=str, default="default_yaml", help='Name of the YAML file in which the YOLOv5 training info is stored')
     parser.add_argument('--epochs', type=int, default=30, help='Number of epochs the model will attempt to train for')
     parser.add_argument('--confidence', type=float, default=0.5, help='Confidence threshold for returned YOLOv5 predictions')
+    parser.add_argument('--input_size', type=int, default=256, help='Square size of the UNet model\'s input layer')
     
-    return parser.parse_args()
+    return parser.parse_args(args)
 
-def run():
-    args = parse_opt()
+def check_args(args):
     use_demo_data = True
     if args.demo_data.upper() != "TRUE":
         use_demo_data = False
         
     if not use_demo_data and (args.classes == [] or args.source == "default_yaml"):
         print("Demo data not used, but no additional information supplied")
-        sys.exit()
+        return False
+    
+    if args.epochs <= 0:
+        print("Cannot train on a non-positive number of epochs")
+        return False
+    elif args.epochs <= 5:
+        print("Training on a low number of epochs may limit effectiveness")
+    
+    if args.confidence < 0 or args.confidence > 1:
+        print("Confidence value must be between 0 and 1")
+        return False
+        
+    if args.input_size <= 0:
+        print("Input size must be a positive number")
+        return False
+    
+    return use_demo_data, args
+
+def run():
+    args = parse_args(sys.argv[1:])
+    use_demo_data, args = check_args(args)
     
     if use_demo_data:
         class_dict = {"cat": 0}
@@ -42,7 +62,7 @@ def run():
     
     num_iterations = 1
     
-    p = multiprocessing.Process(target=model_training.first_train_unet(args.epochs, class_dict))
+    p = multiprocessing.Process(target=model_training.first_train_unet(args.epochs, class_dict, input_size))
     p.start()
     p.join()
     p.close()
@@ -54,7 +74,7 @@ def run():
     while True:
         weight_dir = "exp" if num_iterations == 1 else f"exp{num_iterations}"
         model_detection.detect_yolo(f"runs/train/{weight_dir}/weights/best.pt", args.confidence)
-        model_detection.detect_unet(f"runs/detections/{weight_dir}", class_dict)
+        model_detection.detect_unet(f"runs/detections/{weight_dir}", class_dict, input_size)
         
         print("Launching GUI")
         execute_gui.launch(class_dict)

@@ -6,12 +6,13 @@ import random
 
 class UNetTrainingWithFeedback():
 
-    def __init__(self, image_dataset, mask_dataset, batch_size, epochs):
+    def __init__(self, image_dataset, mask_dataset, batch_size, epochs, input_size):
         self.batch_size = batch_size
         self.buffer_size = 1000
         self.steps_per_epoch = round(0.8*len(image_dataset) / self.batch_size) # Set the total number of steps that will be done per epoch       
         self.epochs = epochs
         self.val_steps = round(0.2*len(image_dataset) / self.batch_size)
+        self.input_size = input_size
         # Establish the batches for training and testing
         self.train_batches, self.validation_batches = self.establish_datasets(image_dataset, mask_dataset)
 
@@ -19,11 +20,11 @@ class UNetTrainingWithFeedback():
     def preprocess_image(self, image, mask):
         """Assumed that the image and mask being passed in are numpy arrays"""
         image_tens = tf.convert_to_tensor(image, dtype=tf.float32)
-        image_tens = tf.image.resize(image_tens, [256, 256])
+        image_tens = tf.image.resize(image_tens, [self.input_size, self.input_size])
         image_tens = image_tens / 255.0
 
         mask_tens = tf.convert_to_tensor(mask, dtype=tf.float32)
-        mask_tens = tf.image.resize(mask_tens, [256, 256])
+        mask_tens = tf.image.resize(mask_tens, [self.input_size, self.input_size])
 
         return image_tens, mask_tens
 
