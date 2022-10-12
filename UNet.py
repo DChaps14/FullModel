@@ -5,6 +5,7 @@ from keras import layers
 class UNet_Named_Layers():
 
     def __init__(self, model_name, encoder_names=True, decoder_names=True):
+        """ Encoder and decoder names utilised to help with the generation and application of transfer learning weights """
         self.encoder_names = encoder_names
         self.decoder_names = decoder_names
         self.model_name = model_name

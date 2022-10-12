@@ -4,9 +4,18 @@ from PIL import Image
 import numpy as np
 import random
 
+""" A class utilised to manipulate the training data, and train the U-Net model """
 class UNetTrainingWithFeedback():
 
     def __init__(self, image_dataset, mask_dataset, batch_size, epochs, input_size):
+        """
+        Inputs:
+        image_dataset - a dataset housing the images we can use for training
+        mask_dataset - a dataset housing the masks we can use for training
+        batch_size - the batch size we want to use for the training data
+        epochs - the number of epochs we want to run training for
+        input_size - the input_size of the model
+        """
         self.batch_size = batch_size
         self.buffer_size = 1000
         self.steps_per_epoch = round(0.8*len(image_dataset) / self.batch_size) # Set the total number of steps that will be done per epoch       
@@ -18,7 +27,7 @@ class UNetTrainingWithFeedback():
 
 
     def preprocess_image(self, image, mask):
-        """Assumed that the image and mask being passed in are numpy arrays"""
+        """ Converts the image and mask to tensors, resizes them to the model's input size, and resizes the colour values to be decimal """
         image_tens = tf.convert_to_tensor(image, dtype=tf.float32)
         image_tens = tf.image.resize(image_tens, [self.input_size, self.input_size])
         image_tens = image_tens / 255.0
@@ -42,12 +51,13 @@ class UNetTrainingWithFeedback():
         image_width = len(image[0])
         image_height = len(image)
 
-        # Get a random integer between 0 and half the images width/height. Then, randomly choose whether to move it to the left or right and up or down, then pad the remaining
+        # Get a random integer between 0 and half the images width/height. Then, randomly choose whether to move it to the left or right and up or down
         ver_shift = random.randrange(image_height//4, image_height//2)
         hor_shift = random.randrange(image_width//4, image_width//2)
         shift_right = random.randrange(2)
         shift_up = random.randrange(2)
 
+        # Depending on how the shift is occuring, extract the pixels to retain, then determine the padding to use
         if shift_up and shift_right:
             horizontal_change = image_width-hor_shift
             mod_image = image[ver_shift:, :horizontal_change]
@@ -76,6 +86,7 @@ class UNetTrainingWithFeedback():
         mod_image = tf.convert_to_tensor(mod_image)
         mod_mask = tf.convert_to_tensor(mod_mask)
 
+        # Pad the extracted pixels to full input size
         paddings = tf.constant([height_padding, width_padding, [0,0]])
         mod_image = tf.pad(mod_image, paddings, 'CONSTANT')
         mod_mask = tf.pad(mod_mask, paddings, 'CONSTANT')
@@ -83,12 +94,16 @@ class UNetTrainingWithFeedback():
         return mod_image, mod_mask
 
     def apply_saturation(self, image, seed):
-        """Adjust the saturation of the image to a random value"""
+        """Adjusts the saturation of the image to a random value
+        Inputs:
+        image - the image to augment
+        seed - a seed for the random generator of shape (2,)"""
         mod_image = tf.image.stateless_random_saturation(image, lower=0.1, upper=0.9, seed=seed)
         return mod_image
 
     def generate_data_lists(self, image_arrays, mask_arrays):
-        """Create a list of tensors that can be converted to a tf Dataset to feed into the model"""
+        """Creates a list of tensors that can be converted to a tf Dataset to feed into the model
+        Takes each image in the list and sends it to each of the augment functions, then appends each of these into the overall image list """
         image_list, mask_list = [], []
         for index, image in enumerate(image_arrays):
             image, mask = self.preprocess_image(image, mask_arrays[index])
@@ -119,11 +134,11 @@ class UNetTrainingWithFeedback():
 
         training_batches = (
             training_dataset
-            .cache() # Cache the images
-            .shuffle(self.buffer_size) # Shuffle the images
-            .batch(self.batch_size) # Batch the images
-            .repeat()
-            .prefetch(buffer_size=tf.data.AUTOTUNE)) # Set up the prefetching technique for the images
+            .cache()
+            .shuffle(self.buffer_size)
+            .batch(self.batch_size)
+            .repeat() # Makes the batch set infinite - hence we need to specify the steps_per_epoch value
+            .prefetch(buffer_size=tf.data.AUTOTUNE))
 
         validation_batches = (
             validation_dataset
@@ -136,6 +151,7 @@ class UNetTrainingWithFeedback():
         return training_batches, validation_batches
 
     def train(self, model):
+        """ Train the model, using the pipelines pre-defined variables """
         callback = keras.callbacks.EarlyStopping(monitor="val_loss", patience=5)
         model.fit(self.train_batches, epochs=self.epochs, steps_per_epoch=self.steps_per_epoch, 
                           validation_data=self.validation_batches, validation_steps=self.val_steps, callbacks=callback)

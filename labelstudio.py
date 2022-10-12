@@ -9,14 +9,16 @@ from bs4 import BeautifulSoup
 import re
 
 def launch(class_dict):
+    """ Launches an html file for the user to label """
     
     html = open("label_studio.html", 'r', encoding="utf-8")
     
+    # Parse the text file into html format
     soup = BeautifulSoup(html, "html.parser")
     label_script = soup.find(id="label_studio_script")
     label_string = label_script.contents[0]
     
-    # Generate the labels to be used within the html
+    # Generate random labels to be used within the html
     colour_string = "0123456789abcdef"
     random.seed()
     new_labels = '<PolygonLabels name="tag" toName="img">\n'
@@ -26,6 +28,7 @@ def launch(class_dict):
         new_labels += html_string
     new_labels += "</PolygonLabels>"
     
+    # Substitute the new labels and random colours into the html
     updated_script = re.sub("<PolygonLabels name=\"tag\" toName=\"img\">[\s\S]+</PolygonLabels>", new_labels, label_string)
     label_script.string = updated_script
     
@@ -38,8 +41,9 @@ def launch(class_dict):
     
     # Retrieve the path of the current file, and use this to find the downloaded annotations
     current_path = os.path.dirname(os.path.abspath(__file__))
-    path = current_path.split("\\")[:3]
-    download_path = "\\".join(path) + "\\Downloads\\annotation.txt"
+    path = current_path.split("\\")[:3] # Extracts the user's directory
+    download_path = "\\".join(path) + "\\Downloads\\annotation.txt" # Finds the annotation within the user's downloads
+    
     # Wait for the user to submit the annotation
     while not os.path.exists(download_path):
         time.sleep(5)
@@ -49,16 +53,20 @@ def launch(class_dict):
     shutil.move(download_path, "./newAnnotation.txt")
     os.remove(download_path)
     
-    # Prepare the data that will be used across each annotation
+    # Open the image and extract its details
     image = Image.open("chosen_image.jpg")
     image_array = np.array(image)
     image_height, image_width, _ = image_array.shape
     full_image_mask = np.zeros((len(image_array), len(image_array[0]), 1))
     detections = []
+    
+    # Open and read the annotation information supplied by the user
     annotation_file = open("newAnnotation.txt")
     annotation_info = annotation_file.readlines()
     for annot_json in annotation_info:
         annot = json.loads(annot_json)
+        
+        # Extract the points from each of the user's annotations
         points = annot["value"]["points"]
         label = annot["value"]["polygonlabels"][0]
         label_int = class_dict.get(label) + 1
@@ -88,6 +96,7 @@ def launch(class_dict):
         full_mask = np.resize(full_mask, (image_height, image_width, 1))
         full_mask = np.where(full_mask, label_int, 0)
         full_image_mask = np.where(full_mask, label_int, full_image_mask)
+        
         # Create the cropped image and mask, and add a new detection for the instance
         crop_image = image_array[miny:maxy, minx:maxx]
         crop_mask = full_mask[miny:maxy, minx:maxx]

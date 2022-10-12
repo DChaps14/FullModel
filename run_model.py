@@ -7,6 +7,7 @@ import argparse
 import sys
 
 def parse_args(args):
+    """ Extracts the information passed from the command line through flags """ 
     parser = argparse.ArgumentParser()
     parser.add_argument('--classes', type=str, nargs="+", help="A list of classes that will be trained", default=[])
     parser.add_argument('--demo_data', type=str, default="True", help='Use demonstration data for the pipeline')
@@ -18,6 +19,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 def check_args(args):
+    """ Checks whether the arguments parsed from the command line are valid, and commands are used in parallel with each other where they should be """
     use_demo_data = True
     if args.demo_data.upper() != "TRUE":
         use_demo_data = False
@@ -43,12 +45,13 @@ def check_args(args):
     return use_demo_data, args
 
 def run():
+    """ Execute the pipeline. Will run in an infinite loop """
     args = parse_args(sys.argv[1:])
     use_demo_data, args = check_args(args)
     
     if use_demo_data:
         class_dict = {"cat": 0}
-         # Install data from the COCO dataset as a demonstration
+         # Install data from the COCO dataset for a demonstration
         setup_dataset.install_dataset(class_dict, 200, 100, args.source)    
     else:
         class_dict = {}
@@ -62,6 +65,7 @@ def run():
     
     num_iterations = 1
     
+    # Run with multiprocessing to help with clearing up the GPU RAM as the pipeline executes its steps
     p = multiprocessing.Process(target=model_training.first_train_unet(args.epochs, class_dict, input_size))
     p.start()
     p.join()
