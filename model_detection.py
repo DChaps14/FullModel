@@ -1,4 +1,3 @@
-import subprocess
 import os
 from PIL import Image
 import numpy as np
@@ -23,7 +22,7 @@ def establish_directories():
             print("Files already created")    
 
 
-def detect_yolo(weights_location, min_confidence):
+def detect_detector(weights_location, min_confidence):
     """ Runs the detection algorithm for the YOLOv5 model 
     Inputs:
     weights_location - the path to the weights we want to use for this detection run
@@ -42,7 +41,7 @@ def sort_images(val):
     """ Function to sort a list of images by their area """
     return (val[2]-val[0])*(val[3]-val[1])
 
-def detect_unet(input_dir, flipped_dict, input_size):
+def detect_segmenter(input_dir, flipped_dict, input_size):
     """ Runs a detection pipeline on U-Net
     Feeds each image's crops through the U-Net for detection, and saves each result to the file system 
     Inputs:

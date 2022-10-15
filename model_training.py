@@ -5,7 +5,7 @@ from setup_dataset import extract_usables
 import subprocess
 import yolov5.train as train
 
-def first_train_unet(epochs, class_dict, input_size):
+def first_train_segmenter(epochs, class_dict, input_size):
     """ Runs a training pipeline on U-Net
     This is executed the first time training is done on the U-Net model 
     Inputs:
@@ -41,7 +41,7 @@ def first_train_unet(epochs, class_dict, input_size):
     model = training_pipeline.train(model)
     model.save("model.h5")
     
-def further_train_unet(epochs, class_dict):
+def further_train_segmenter(epochs, class_dict):
     """ Runs the U-Net model through a training iteration
     This is to be called on every other occasion but the first training instance 
     Inputs:
@@ -54,7 +54,7 @@ def further_train_unet(epochs, class_dict):
     model = training_pipeline.train(model)
     model.save("model.h5")
     
-def train_yolo(epochs, data_yaml, weights_location):
+def train_detector(epochs, data_yaml, weights_location):
     """ Runs the YOLOv5 model through a training iteration
     Inputs:
     epochs - the number of epochs to run the training for

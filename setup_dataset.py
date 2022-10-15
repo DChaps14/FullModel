@@ -39,6 +39,7 @@ def extract_usables(class_dict):
         skip_full_image = mask_info.get("skip_full_image") # The user has indicated that it is not suitable to create a full image using the masks we have
         
         base_image = Image.open(image.path)
+        # Convert the image to RGB mode if it isn't already
         if base_image.mode != "RGB":
             base_image = image.convert("RGB")
         image_array = np.array(Image.open(image.path))
@@ -175,6 +176,5 @@ def install_dataset(class_dict, num_samples, num_trainable, yaml_filename):
     info_file.write("train: ../UNetPredictions/yolov5/images/train\n")
     info_file.write("val: ../UNetPredictions/yolov5/images/val\n")
     info_file.write(f"\nnc: {len(class_dict)}\n")
-    class_labels = list(class_dict.values())
-    info_file.write(f"\nnames: {class_labels}")
+    info_file.write(f"\nnames: {classes}")
     info_file.close()

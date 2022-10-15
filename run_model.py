@@ -65,32 +65,36 @@ def run():
     
     num_iterations = 1
     
+    # Train the detector and segmentor with the initial training images, after applying transfer learning weights
     # Run with multiprocessing to help with clearing up the GPU RAM as the pipeline executes its steps
-    p = multiprocessing.Process(target=model_training.first_train_unet(args.epochs, class_dict, input_size))
+    p = multiprocessing.Process(target=model_training.first_train_segmenter(args.epochs, class_dict, input_size))
     p.start()
     p.join()
     p.close()
-    p = multiprocessing.Process(target=model_training.train_yolo(args.epochs, args.source, "yolov5s.pt"))
+    p = multiprocessing.Process(target=model_training.train_detector(args.epochs, args.source, "yolov5s.pt"))
     p.start()
     p.join()
     p.close()
     
     while True:
+        # DETECTION PORTION
         weight_dir = "exp" if num_iterations == 1 else f"exp{num_iterations}"
-        model_detection.detect_yolo(f"runs/train/{weight_dir}/weights/best.pt", args.confidence)
-        model_detection.detect_unet(f"runs/detections/{weight_dir}", class_dict, input_size)
+        model_detection.detect_detector(f"runs/train/{weight_dir}/weights/best.pt", args.confidence)
+        model_detection.detect_segmenter(f"runs/detections/{weight_dir}", class_dict, input_size)
         
+        # USER APPROVAL PORTION
         print("Launching GUI")
         execute_gui.launch(class_dict)
         
         print(f"Training and Detection Iteration {num_iterations} completed")
         num_iterations += 1
         
-        p = multiprocessing.Process(target=model_training.further_train_unet(args.epochs, class_dict))
+        # FURTHER TRAINING PORTION
+        p = multiprocessing.Process(target=model_training.further_train_segmenter(args.epochs, class_dict))
         p.start()
         p.join()
         p.close()    
-        p = multiprocessing.Process(target=model_training.train_yolo(args.epochs, args.source, f"runs/train/{weight_dir}/weights/best.pt"))
+        p = multiprocessing.Process(target=model_training.train_detector(args.epochs, args.source, f"runs/train/{weight_dir}/weights/best.pt"))
         p.start()
         p.join()
         p.close()
