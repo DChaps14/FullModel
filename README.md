@@ -5,9 +5,9 @@ After the completion of a number of iterations of the pipeline can provide both 
 
 # Running the pipeline
 ## Prior Dependencies
-The weights for the transfer learning can be found in the following OneDrive folder: https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo
+The weights for the transfer learning can be found in [this OneDrive folder](https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo)
 
-Apart from this repository, the operation of the pipeline requires a clone of the modified YOLOv5 model: https://github.com/DChaps14/yolov5. This repository needs to be cloned within the 'FullModel' directory, housing the model's python scripts.
+Apart from this repository, the operation of the pipeline requires a clone of the [modified YOLOv5 model](https://github.com/DChaps14/yolov5). This repository needs to be cloned within the 'FullModel' directory, housing the model's python scripts.
 
 To install the required dependecies for the pipeline, run the following commands
 
@@ -91,11 +91,11 @@ These additions may make the pipeline more of a tool to help generate a dataset,
 ## Design Decisions
 - The validation split is randomly generated for each iteration of the pipeline. This was done to ensure that the pipeline saw as many images in its training dataset as possible across each iteration.
 - After completing a Labelstudio operation, the user does not have to download the instance manually and add it to the training dataset. Instead, the image is downloaded automatically by simulating a click and extracting it from the Downloads folder of the current user. This was done to allow smooth operation of the pipeline, as well as to decrease the amount of human interaction.
-- The notebooks within the following Google Drive folder should outline the decision making process in why techniques or models were added to the pipeline: https://drive.google.com/drive/folders/1Ily8QIiTOLN2Cy7dTw2pGh8_NBIzGF_u?usp=sharing
+- The notebooks within this [Google Drive folder](https://drive.google.com/drive/folders/1Ily8QIiTOLN2Cy7dTw2pGh8_NBIzGF_u?usp=sharing) should outline the decision making process in why techniques or models were added to the pipeline: 
 - GitHub links for the initial technology and paradigm research:
-    - (Tensorflow/Keras) [https://github.com/DChaps14/Tensorflow-Spikes]
-    - (PyTorch) [https://github.com/DChaps14/PyTorch-Spikes]
-    - (Architectures) [https://github.com/DChaps14/architecture-spikes]
-    - (Training Paradigms) [https://github.com/DChaps14/training-spikes]
-    - [Initial YOLO Object Detection Research] (https://github.com/DChaps14/Object-Detection)
-    - [Draft of the Complete Model] (https://github.com/DChaps14/Complete-Model)
+    - [Tensorflow/Keras](https://github.com/DChaps14/Tensorflow-Spikes)
+    - [PyTorch](https://github.com/DChaps14/PyTorch-Spikes)
+    - [Architectures](https://github.com/DChaps14/architecture-spikes)
+    - [Training Paradigms](https://github.com/DChaps14/training-spikes)
+    - [Initial YOLO Object Detection Research](https://github.com/DChaps14/Object-Detection)
+    - [Draft of the Complete Model](https://github.com/DChaps14/Complete-Model)
