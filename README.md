@@ -92,3 +92,10 @@ These additions may make the pipeline more of a tool to help generate a dataset,
 - The validation split is randomly generated for each iteration of the pipeline. This was done to ensure that the pipeline saw as many images in its training dataset as possible across each iteration.
 - After completing a Labelstudio operation, the user does not have to download the instance manually and add it to the training dataset. Instead, the image is downloaded automatically by simulating a click and extracting it from the Downloads folder of the current user. This was done to allow smooth operation of the pipeline, as well as to decrease the amount of human interaction.
 - The notebooks within the following Google Drive folder should outline the decision making process in why techniques or models were added to the pipeline: https://drive.google.com/drive/folders/1Ily8QIiTOLN2Cy7dTw2pGh8_NBIzGF_u?usp=sharing
+- GitHub links for the initial technology and paradigm research:
+    - (Tensorflow/Keras) [https://github.com/DChaps14/Tensorflow-Spikes]
+    - (PyTorch) [https://github.com/DChaps14/PyTorch-Spikes]
+    - (Architectures) [https://github.com/DChaps14/architecture-spikes]
+    - (Training Paradigms) [https://github.com/DChaps14/training-spikes]
+    - [Initial YOLO Object Detection Research] (https://github.com/DChaps14/Object-Detection)
+    - [Draft of the Complete Model] (https://github.com/DChaps14/Complete-Model)
