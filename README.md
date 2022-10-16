@@ -77,10 +77,10 @@ The pipeline has been designed in a way that aims to allow for easy extension wi
 ## Future Additions
 The initial extension that I would recommend is the deployment of this pipeline to a cloud service provider. A large amount of storage space is necessary to store the images that the model utilises for both prediction and training, and the pipeline requires GPU intensive operations to train each model that any user's computer might not be able to accomplish. Hence, to ensure that the pipeline is widely available and usable by any client, an instance may need to be established on-cloud for wider use.
 
-A Generative Adversarial Network may be beneficial if added to the pipeline. As GANs attempts to train a classifier by creating images that should theoretically be indistinguishable from real images, such a model could be implemented into the pipeline in an attempt to generate more images to be used to train the model.
+A Generative Adversarial Network may be beneficial if added to the pipeline. As GANs attempt to train a model by creating images that should theoretically be indistinguishable from real images, such a model could be implemented into the pipeline in an attempt to generate more images to be used to train the model.
 
-Finally, a correction funcionality could be added to the GUI - currently, the user does not have a way to provide feedback to the model other than whether or not it was suitable. Such a mechanism could allow a user to rectify any mistakes that the model has made in its predictions, allowing for a faster completion and generation of the dataset. Three options for correction stand out to me at this point
-- An image is pushed to labelstudio if the pipeline doesn't provide suitable results from it after a set number of iterations
+Finally, a correction functionality could be added to the GUI - currently, the user does not have a way to provide feedback to the model other than whether or not it was suitable. Such a mechanism could allow a user to rectify any mistakes that the model has made in its predictions, allowing for a faster completion and generation of the dataset. Three options for correction stand out to me at this point:
+- An image is pushed to LabelStudio if the pipeline doesn't provide suitable results for it after a set number of iterations.
 - Buttons are added to the GUI that the user can utilise to inform the model on why the image is not suitable. This feedback can help the pipeline to either improve its training processes, or inform the user on the best steps forward.
 - The user is able to 'touch up' the images presented to them, by shifting or adding bounding boxes, or removing or adding areas of classification to the images that are presented to them.
 
