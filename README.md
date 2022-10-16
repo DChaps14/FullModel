@@ -1,11 +1,11 @@
 # SICLOPS: Sets of Images Created and Labelled using Object Perception and Segmentation
 
 # Result of Pipeline
-After the completion of a number of iterations of the pipeline can provide both an instance-segmented dataset, as well as an object detector and semantic segmenter that have been suitably trained to generate this dataset. The user can either extract the dataset to train additional models, or extract either of the models to utilise their already trained weights.
+After the completion of a number of iterations, the pipeline can theoretically provide both an instance-segmented dataset, as well as an object detector and semantic segmenter that have been suitably trained to generate this dataset. The user can either extract the dataset to train additional models, or extract either of the models to utilise their already trained weights.
 
 # Running the pipeline
 ## Prior Dependencies
-The weights for the transfer learning can be found in [this OneDrive folder](https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo)
+The weights for the transfer learning can be found in [this OneDrive folder](https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo). These must be stored within the main directory, housing the pipeline's python scripts.
 
 Apart from this repository, the operation of the pipeline requires a clone of the [modified YOLOv5 model](https://github.com/DChaps14/yolov5). This repository needs to be cloned within the 'FullModel' directory, housing the model's python scripts.
 
@@ -16,8 +16,6 @@ To install the required dependecies for the pipeline, run the following commands
 ``python3 -m pip install -r requirements.txt``
 
 ``python3 -m pip install -r yolov5/requirements.txt``
-
-The weights that are utilised by the segmenter are located within a 7zip file 
 
 ## Setting up images for training
 To utilise our own dataset, the training images need to be established in a particular way, such that they can be accessed by the YOLOv5 model.
