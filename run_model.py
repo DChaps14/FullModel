@@ -52,7 +52,7 @@ def run():
     if use_demo_data:
         class_dict = {"cat": 0}
          # Install data from the COCO dataset for a demonstration
-        setup_dataset.install_dataset(class_dict, 200, 100, args.source)    
+        setup_dataset.install_dataset(class_dict, 30, 10, args.source)    
     else:
         class_dict = {}
         for target_class in args.classes:
@@ -67,7 +67,7 @@ def run():
     
     # Train the detector and segmentor with the initial training images, after applying transfer learning weights
     # Run with multiprocessing to help with clearing up the GPU RAM as the pipeline executes its steps
-    p = multiprocessing.Process(target=model_training.first_train_segmenter(args.epochs, class_dict, input_size))
+    p = multiprocessing.Process(target=model_training.first_train_segmenter(args.epochs, class_dict, args.input_size))
     p.start()
     p.join()
     p.close()
@@ -80,7 +80,7 @@ def run():
         # DETECTION PORTION
         weight_dir = "exp" if num_iterations == 1 else f"exp{num_iterations}"
         model_detection.detect_detector(f"runs/train/{weight_dir}/weights/best.pt", args.confidence)
-        model_detection.detect_segmenter(f"runs/detections/{weight_dir}", class_dict, input_size)
+        model_detection.detect_segmenter(f"runs/detections/{weight_dir}", class_dict, args.input_size)
         
         # USER APPROVAL PORTION
         print("Launching GUI")

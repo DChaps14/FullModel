@@ -35,7 +35,7 @@ def extract_usables(class_dict):
             split = "val"
         else:
             split = "train"
-        mask_info = json.load(open(image.path.replace("/images/", "/masks/").replace(".jpg", ".json")))
+        mask_info = json.load(open(image.path.replace("images", "masks").replace(".jpg", ".json")))
         skip_full_image = mask_info.get("skip_full_image") # The user has indicated that it is not suitable to create a full image using the masks we have
         
         base_image = Image.open(image.path)
@@ -44,6 +44,7 @@ def extract_usables(class_dict):
             base_image = image.convert("RGB")
         image_array = np.array(Image.open(image.path))
         image_name = image.name.split('/')[-1]
+        image_name = image_name.split('\\')[-1]
         image_height, image_width, _ = image_array.shape
         
         if not skip_full_image:
@@ -125,7 +126,10 @@ def install_dataset(class_dict, num_samples, num_trainable, yaml_filename):
     
     for index, sample in enumerate(coco_training_dataset):
         image_filepath = sample['filepath']
-        image_name = image_filepath.split("/")[-1]
+        
+        # Split on both types of slashes, to ensure that the path is achieved on any platform
+        image_name = image_filepath.split("\\")[-1]
+        image_name = image_name.split("/")[-1]
         image = Image.open(image_filepath)
         # Some images in the COCO dataset aren't RGB, which may mess up the model - convert them here to be safe
         if image.mode != "RGB":
@@ -172,7 +176,7 @@ def install_dataset(class_dict, num_samples, num_trainable, yaml_filename):
     
     
     # Fill out a yaml file with information the YOLOv5 model can use to find the training images
-    info_file = open(f"yolov5/data/{data_yaml}.yaml", 'w')
+    info_file = open(f"yolov5/data/{yaml_filename}.yaml", 'w')
     info_file.write("train: ../UNetPredictions/yolov5/images/train\n")
     info_file.write("val: ../UNetPredictions/yolov5/images/val\n")
     info_file.write(f"\nnc: {len(class_dict)}\n")

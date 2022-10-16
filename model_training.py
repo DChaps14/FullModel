@@ -16,6 +16,8 @@ def first_train_segmenter(epochs, class_dict, input_size):
     # Get the images that we can use to train the model
     usable_images, usable_masks = extract_usables(class_dict)
     
+    print("-----------Running Segmentor Training-----------")
+    
     model = UNet_Named_Layers("base_model", decoder_names=False).create_model((input_size, input_size, 3), len(class_dict)+1)
     # Load the transfer learning weights in, and freeze the decoder and bottleneck
     model.load_weights("model_weights.h5", by_name=True)
@@ -30,6 +32,8 @@ def first_train_segmenter(epochs, class_dict, input_size):
             metrics=["accuracy"]
     )
     model = training_pipeline.train(model)
+    
+    print("-----------Running Fine-tuning-----------")
     
     # Train the model again with fine-tuning
     model.trainable = True
@@ -48,6 +52,7 @@ def further_train_segmenter(epochs, class_dict):
     epochs - the number of epochs to train the model for
     class_dict - a class dictionary of the format {class_description: label_integer} 
     """
+    print("-----------Running Segmenter Training-----------")
     usable_images, usable_masks = extract_usables(class_dict)
     training_pipeline = UNetTrainingWithFeedback(usable_images, usable_masks, len(usable_images)//10, epochs, class_dict, input_size)
     model = keras.models.load_model('model.h5')

@@ -67,7 +67,7 @@ def detect_segmenter(input_dir, flipped_dict, input_size):
             continue
         image_crops = []
         image_name = f"{crops.name[:-4]}"
-        image = np.array(Image.open(crops.path.replace("/labels/", "/").replace("txt", "jpg")))
+        image = np.array(Image.open(crops.path.replace("/labels/", "/").replace('\\labels\\', '\\').replace("txt", "jpg")))
         image_height, image_width, _ = image.shape
         crops_file = open(crops.path, 'r')
         # Add details about each crop stored in the file to a list
