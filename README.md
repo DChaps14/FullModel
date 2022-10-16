@@ -5,7 +5,7 @@ After the completion of a number of iterations, the pipeline can theoretically p
 
 # Running the pipeline
 ## Prior Dependencies
-The weights for the transfer learning can be found in [this OneDrive folder](https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo). These must be stored within the main directory, housing the pipeline's python scripts.
+The weights for the segmenter's transfer learning can be found in [this OneDrive folder](https://1drv.ms/u/s!AhDiTpIEQVOS_XjTor-DALb3HzB2?e=CFhQTo). These must be stored within the main directory, housing the pipeline's python scripts.
 
 Apart from this repository, the operation of the pipeline requires a clone of the [modified YOLOv5 model](https://github.com/DChaps14/yolov5). This repository needs to be cloned within the 'FullModel' directory, housing the model's python scripts.
 
@@ -19,7 +19,7 @@ To install the required dependecies for the pipeline, run the following commands
 
 ## Setting up images for training
 To utilise our own dataset, the training images need to be established in a particular way, such that they can be accessed by the YOLOv5 model.
-The YOLOv5 model needs a yaml file that outlines how many classes need to be trained, what these classes are. The format should be as follows:
+The YOLOv5 model needs a yaml file that outlines how many classes need to be trained, and what these classes are. The format should be as follows:
 
 ``train: ../UNetPredictions/yolov5/images/train``
 
@@ -31,7 +31,7 @@ The YOLOv5 model needs a yaml file that outlines how many classes need to be tra
 
 This file needs to be stored within the 'data' directory of the 'yolov5' model.
 
-The images that we want to utilise for initial training data needs to be stored in the following directory path in jpg format: ``FullModel\UNetPredictions\usableImages\images``. 
+The images that we want to utilise for initial training data need to be stored in the following directory path in jpg format: ``FullModel\UNetPredictions\usableImages\images``. 
 
 The masks for these images need to be stored in the following json format:
 
@@ -53,7 +53,7 @@ A mask within the .json file should look something like the following:
 
 ``[[0], [0], [2], ..., [1]]]``
 
-where [0] denotes a pixel with the background label, [1] denotes a pixel with the label of class 1, and so on.
+where ``[0]`` denotes a pixel with the background label, ``[1]`` denotes a pixel with the label of class 1, and so on.
 
 ## Command Line Arguments
 To run the pipeline with sample data, execute the following command in the command line of the FullModel directory:
@@ -67,7 +67,7 @@ Additional information can be passed to the pipeline to utilise your own images,
 | --demo_data | Whether to use demonstration data for the pipeline | ``True`` or ``False`` | If ``False``, requires --classes, --source | 
 | --source | The name of the yaml file stored in yolov5/data that holds the YOLOv5 training data | Any | Will have no effect if --demo_data is not ``False`` |
 | --epochs | The number of epochs the pipeline will train each model for | Any positive integer (recommended above 5) | Code will exectue if value is below 5, but higher epochs may allow better results |
-| --confidence | The minimum confidence for the YOLOv5 predictions that are returned | Any floating point between 0 and 1 | None |
+| --confidence | The minimum confidence for the YOLOv5 predictions that are returned | Any number between 0 and 1 inclusive | None |
 | --input_size | The square size the pipeline will reshape the UNet model's input images to | Any integer | Higher values may increase execution time and memory cost |
 
 # Further Considerations
